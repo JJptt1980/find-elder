@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- 異星天空：上方深青、地平線附近偏黃綠 -->
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b3b36"/>
+      <stop offset="0.55" stop-color="#2f8f6a"/>
+      <stop offset="1" stop-color="#b8e07a"/>
+    </linearGradient>
+    <linearGradient id="sea" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3fa58c"/>
+      <stop offset="1" stop-color="#0f4a43"/>
+    </linearGradient>
+    <linearGradient id="rock" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5d7f52"/>
+      <stop offset="0.6" stop-color="#3b5b3a"/>
+      <stop offset="1" stop-color="#223a26"/>
+    </linearGradient>
+    <radialGradient id="sun" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#fffbe0"/>
+      <stop offset="0.4" stop-color="#fff3a8" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#fff3a8" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="blip" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0" stop-color="#eaffef"/>
+      <stop offset="0.35" stop-color="#39ff7a"/>
+      <stop offset="1" stop-color="#39ff7a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="trailA" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#fff6c8" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="trailB" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#d6f4ff" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="sweep" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#39ff7a" stop-opacity="0"/>
+      <stop offset="1" stop-color="#39ff7a" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 背景 -->
+  <rect width="512" height="512" fill="url(#sky)"/>
+  <circle cx="150" cy="150" r="70" fill="url(#sun)"/>
+
+  <!-- 遠方小島與球形樹 -->
+  <path d="M40 372 q30 -22 70 -6 q20 8 40 6 l0 10 l-110 0z" fill="#4f8a5c" opacity="0.7"/>
+  <line x1="78" y1="364" x2="80" y2="334" stroke="#4f8a5c" stroke-width="3" opacity="0.7"/>
+  <circle cx="80" cy="330" r="9" fill="#6db36f" opacity="0.7"/>
+  <line x1="104" y1="366" x2="104" y2="344" stroke="#4f8a5c" stroke-width="3" opacity="0.7"/>
+  <circle cx="104" cy="340" r="7" fill="#6db36f" opacity="0.7"/>
+
+  <!-- 海 -->
+  <rect y="378" width="512" height="134" fill="url(#sea)"/>
+  <path d="M60 410 h60 M180 432 h80 M300 418 h50 M120 460 h70" stroke="#8fe0c2" stroke-width="3" stroke-linecap="round" opacity="0.45"/>
+
+  <!-- 大長老的高塔岩柱 -->
+  <path d="M330 400 C336 330 340 260 346 205 L398 205 C404 260 410 330 420 400 Z" fill="url(#rock)"/>
+  <path d="M340 205 h64 l-6 10 h-52z" fill="#2c4a2e"/>
+  <!-- 頂上的蛋形小屋 -->
+  <ellipse cx="372" cy="176" rx="40" ry="32" fill="#f1f4e4"/>
+  <path d="M332 178 a40 32 0 0 0 80 0z" fill="#d3dcc2"/>
+  <path d="M362 208 v-14 a10 10 0 0 1 20 0 v14z" fill="#2c4a2e"/>
+  <circle cx="344" cy="184" r="3.5" fill="#2c4a2e"/>
+  <circle cx="400" cy="184" r="3.5" fill="#2c4a2e"/>
+  <path d="M340 160 q32 -18 64 0" stroke="#c4cfae" stroke-width="3" fill="none"/>
+
+  <!-- 雷達：以小屋為目標的掃描圈 -->
+  <g fill="none" stroke="#39ff7a" stroke-linecap="round">
+    <circle cx="372" cy="176" r="62" stroke-width="3" opacity="0.55"/>
+    <circle cx="372" cy="176" r="96" stroke-width="2" opacity="0.3" stroke-dasharray="6 10"/>
+  </g>
+  <path d="M372 176 L372 80 A96 96 0 0 1 455 128 Z" fill="url(#sweep)"/>
+  <circle cx="372" cy="128" r="16" fill="url(#blip)"/>
+
+  <!-- 兩道飛行光跡：一大一小，朝高塔飛去 -->
+  <path d="M70 330 Q170 300 262 238" stroke="url(#trailA)" stroke-width="16" stroke-linecap="round" fill="none"/>
+  <path d="M96 380 Q190 340 286 276" stroke="url(#trailB)" stroke-width="11" stroke-linecap="round" fill="none"/>
+  <circle cx="264" cy="237" r="12" fill="#fffbe6"/>
+  <circle cx="264" cy="237" r="22" fill="#fff3a8" opacity="0.35"/>
+  <circle cx="288" cy="275" r="8.5" fill="#f2fbff"/>
+  <circle cx="288" cy="275" r="16" fill="#d6f4ff" opacity="0.35"/>
+</svg>
