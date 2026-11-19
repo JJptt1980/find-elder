@@ -34,18 +34,24 @@ export function coverKm(farthestM: number): number {
   return 20000;
 }
 
+/** 兩顆寶物至少隔這麼遠（半徑的比例），免得兩顆疊在一起、一次撿兩顆 */
+export const MIN_GAP = 0.15;
+
 /**
- * 在 center 周圍撒 count 個：距離在半徑的 25%～100% 之間（面積平均，不會擠在中間），
- * 方位均分成 count 等份再各自亂數偏移，才不會好幾顆擠在同一邊。
+ * 在 center 周圍完全隨機撒 count 個：方向、距離都是亂數（距離 10%～100% 半徑，面積平均）。
+ * 唯一的限制是兩顆不能太近；所以有時候會好幾顆擠在同一邊、某一邊空空的，看起來才像真的亂撒。
  */
 export function scatter(center: LatLon, radiusM: number, now: number, rand: () => number = Math.random, count = TREASURE_COUNT): Hunt {
-  const minR = radiusM * 0.25;
-  const offset = rand() * 360;
+  const minR = radiusM * 0.1;
+  const gap = radiusM * MIN_GAP;
   const items: Treasure[] = [];
-  for (let i = 0; i < count; i++) {
-    const bearing = (offset + (i + 0.15 + rand() * 0.7) * (360 / count)) % 360;
+  for (let tries = 0; items.length < count && tries < 2000; tries++) {
+    const bearing = rand() * 360;
     const r = Math.sqrt(minR ** 2 + rand() * (radiusM ** 2 - minR ** 2));
-    items.push({ id: `t${now}-${i}`, n: 0, ...destination(center, bearing, r) });
+    const p = destination(center, bearing, r);
+    // 試太多次都放不下（幾乎不會發生）就不管間距了
+    if (tries < 1500 && items.some((t) => distanceM(t, p) < gap)) continue;
+    items.push({ id: `t${now}-${items.length}`, n: 0, ...p });
   }
   // 編號照距離排：第 1 顆最近
   items.sort((a, b) => distanceM(center, a) - distanceM(center, b)).forEach((t, i) => (t.n = i + 1));

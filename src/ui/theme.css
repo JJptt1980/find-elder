@@ -216,6 +216,9 @@ body { overflow-x: hidden; }
 /* 底部留 64px 給縮放鈕的圓盤，雷達不會被它蓋住（不論有沒有瀏覽器網址列） */
 .app.fit .page { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-top: calc(env(safe-area-inset-top) + 14px); padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 64px); }
 .app.fit .radar-page { flex: 1; min-height: 0; }
+/* 在瀏覽器分頁裡（不是從主畫面打開）：雷達跟螢幕一樣寬，頁面可以往下滑 */
+.app.fit.browser { height: auto; min-height: 100dvh; overflow: visible; }
+.app.fit.browser .page, .app.fit.browser .radar-page, .app.fit.browser .radar-wrap { flex: none; }
 .radar-card { background: var(--surface); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
 .card-stack { display: flex; flex-direction: column; gap: 8px; }
 /* 梗固定佔兩行高：句子長短不同時版面不跳、雷達不會跟著縮放 */
@@ -411,3 +414,5 @@ body { overflow-x: hidden; }
 .picker-foot .btn { width: 100%; }
 .leaflet-container { font: inherit; }
 .top-gap { margin-top: 12px; width: 100%; }
+.radar-reset { position: absolute; z-index: 2; top: 2px; left: 12px; width: 36px; height: 32px; padding: 0; border: 0; background: none; color: var(--muted); opacity: 0.5; display: grid; place-items: center; cursor: pointer; }
+.radar-reset svg { width: 20px; height: 20px; }

@@ -7,6 +7,10 @@ import { clampRange, clusterDots, clusterRadius, fitRange, nextZoom, niceStep, z
 import { playZoom } from './radarSound';
 import { useTilt } from './useTilt';
 
+/** 不是從主畫面圖示打開（一般瀏覽器分頁） */
+export const inBrowser = (): boolean =>
+  !matchMedia('(display-mode: standalone)').matches && !matchMedia('(display-mode: fullscreen)').matches && !(navigator as Navigator & { standalone?: boolean }).standalone;
+
 export interface Target extends LatLon {
   id: string;
   /** 在雷達上點旁邊顯示的短名字（showLabels 時才畫） */
@@ -160,7 +164,10 @@ export function Radar<T extends Target>(props: {
     const resize = () => {
       const dpr = window.devicePixelRatio || 1;
       const wrap = canvas.parentElement!.parentElement!;
-      size = Math.max(200, Math.min(wrap.clientWidth, wrap.clientHeight, 560));
+      // 加到主畫面（全螢幕）時一個畫面放得下，照剩下的高度畫；
+      // 用網址在瀏覽器裡打開時高度被網址列吃掉，改成跟螢幕一樣寬，頁面可以往下滑（滑了網址列也會收起來）
+      const limit = inBrowser() ? wrap.clientWidth : Math.min(wrap.clientWidth, wrap.clientHeight);
+      size = Math.max(200, Math.min(limit, 560));
       canvas.style.width = canvas.style.height = `${size}px`;
       canvas.parentElement!.style.setProperty('--s', `${size}px`);
       canvas.width = canvas.height = Math.round(size * dpr);

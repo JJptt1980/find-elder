@@ -16,6 +16,7 @@ export function TreasureMode() {
   const gps = useGpsStatus();
   const [hunt, setHunt] = useState<Hunt | null>(() => load<Hunt | null>(HUNT_KEY, null));
   const [got, setGot] = useState<Treasure[] | null>(null);
+  const [askReset, setAskReset] = useState(false);
   const huntRef = useRef(hunt);
   huntRef.current = hunt;
 
@@ -28,6 +29,7 @@ export function TreasureMode() {
     if (!fix) return;
     update(scatter(fix, HUNT_RADIUS_M, Date.now()));
     setGot(null);
+    setAskReset(false);
   };
 
   // 還沒開始：等定位夠準（剛打開時常先拿到誤差好幾百公尺的網路定位）就自動撒
@@ -88,7 +90,43 @@ export function TreasureMode() {
 
   return (
     <>
-      <RadarScreen radarKey={`hunt-${hunt?.startedAt ?? 0}`} me={fix} targets={left} bestId={nearest?.id ?? null} maxKm={maxKm} autoFit={false} top={top} foot="尋寶" />
+      <RadarScreen
+        radarKey={`hunt-${hunt?.startedAt ?? 0}`}
+        me={fix}
+        targets={left}
+        bestId={nearest?.id ?? null}
+        maxKm={maxKm}
+        autoFit={false}
+        top={top}
+        foot="尋寶"
+        corner={
+          hunt &&
+          fix && (
+            // 小小的放在雷達左上角，不容易誤觸；按了還要再確認一次
+            <button type="button" class="radar-reset" aria-label="重新撒寶物" title="重新撒寶物" onClick={() => setAskReset(true)}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12a8 8 0 1 0 2.4-5.7" />
+                <path d="M4 4v4.5h4.5" />
+              </svg>
+            </button>
+          )
+        }
+      />
+      {askReset && (
+        <Dialog title="重新撒寶物？" onClose={() => setAskReset(false)}>
+          <p>
+            {found > 0 ? `已經找到的 ${found} 顆會清掉，` : ''}在你現在的位置周圍重新撒七顆。
+          </p>
+          <div class="btn-row">
+            <button type="button" class="btn secondary" onClick={() => setAskReset(false)}>
+              取消
+            </button>
+            <button type="button" class="btn danger" onClick={start}>
+              確定重撒
+            </button>
+          </div>
+        </Dialog>
+      )}
       {got && (
         <Dialog title={left.length ? `找到第 ${got.map((t) => t.n).join('、')} 顆！` : '七顆全部到齊！'} onClose={() => setGot(null)}>
           <p class="big-emoji" aria-hidden="true">

@@ -19,6 +19,8 @@ export function RadarScreen<T extends Target>(props: {
   top: ComponentChildren;
   foot?: string;
   radarKey?: string;
+  /** 放在雷達左上角的小按鈕 */
+  corner?: ComponentChildren;
 }) {
   const heading = useHeading();
   const [sound, toggleSound] = useSound();
@@ -42,6 +44,7 @@ export function RadarScreen<T extends Target>(props: {
         sound={sound}
         onPick={props.onPick}
       >
+        {props.corner}
         <SoundBadge key={beep?.at ?? 0} on={sound} beepBand={beep && Date.now() - beep.at < 1500 ? beep.band : 0} onToggle={toggleSound} />
       </Radar>
     </div>

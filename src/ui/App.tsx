@@ -5,6 +5,7 @@ import { SpotsMode } from '../modes/SpotsMode';
 import { TreasureMode } from '../modes/TreasureMode';
 import { Dialog } from './Dialog';
 import { load, save } from './common';
+import { inBrowser } from '../radar/Radar';
 
 type Tab = 'treasure' | 'food' | 'spots';
 const TAB_KEY = 'fe-tab';
@@ -49,7 +50,7 @@ export function App() {
     setTab(t);
   };
   return (
-    <div class="app fit">
+    <div class={`app fit${inBrowser() ? ' browser' : ''}`}>
       <main class="page">
         {tab === 'treasure' && <TreasureMode />}
         {tab === 'food' && <FoodMode />}

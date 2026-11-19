@@ -38,21 +38,31 @@ describe('地理', () => {
 });
 
 describe('尋寶', () => {
-  it('撒七個，都在範圍內、不會太近，編號由近到遠', () => {
+  it('撒七個，都在範圍內、不會太靠近自己，編號由近到遠', () => {
     const h = scatter(HOME, 800, 1, seeded(7));
     expect(h.items).toHaveLength(7);
     const d = h.items.map((t) => distanceM(HOME, t));
     for (const x of d) {
-      expect(x).toBeGreaterThanOrEqual(199);
+      expect(x).toBeGreaterThanOrEqual(79);
       expect(x).toBeLessThanOrEqual(801);
     }
     expect(h.items.map((t) => t.n)).toEqual([1, 2, 3, 4, 5, 6, 7]);
     expect([...d].sort((a, b) => a - b)).toEqual(d);
   });
-  it('方位分散在不同方向', () => {
-    const h = scatter(HOME, 800, 1, seeded(3));
-    const sectors = new Set(h.items.map((t) => Math.floor(bearingDeg(HOME, t) / (360 / 7))));
-    expect(sectors.size).toBeGreaterThanOrEqual(5);
+  it('完全隨機，但任兩顆至少隔 15% 半徑', () => {
+    for (const seed of [1, 2, 3, 42, 99]) {
+      const h = scatter(HOME, 800, 1, seeded(seed));
+      for (const a of h.items) for (const b of h.items) if (a !== b) expect(distanceM(a, b)).toBeGreaterThanOrEqual(120 - 1);
+    }
+  });
+  it('不會每次都平均分在七個方向', () => {
+    // 換幾種亂數，至少有一次某個 1/7 扇區放了兩顆以上
+    const crowded = [1, 2, 3, 4, 5, 6, 7, 8].some((seed) => {
+      const h = scatter(HOME, 800, 1, seeded(seed));
+      const sectors = h.items.map((t) => Math.floor(bearingDeg(HOME, t) / (360 / 7)));
+      return new Set(sectors).size < 7;
+    });
+    expect(crowded).toBe(true);
   });
   it('走到 25 公尺內才撿到，撿過的不會再撿', () => {
     const h = scatter(HOME, 300, 1, seeded(11));
