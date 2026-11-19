@@ -58,7 +58,7 @@ import { clampTilt } from '../src/radar/useTilt';
 
 describe('體感', () => {
   it('轉動角度有上限', () => {
-    expect([clampTilt(30), clampTilt(-30), clampTilt(5)]).toEqual([14, -14, 5]);
+    expect([clampTilt(40), clampTilt(-40), clampTilt(5)]).toEqual([28, -28, 5]);
   });
 });
 

@@ -3,7 +3,9 @@ import type { RefObject } from 'preact';
 import { useEffect } from 'preact/hooks';
 
 /** 最多轉幾度 */
-const MAX_DEG = 14;
+const MAX_DEG = 28;
+/** 手機傾斜 1 度，雷達轉幾度（放大才看得出來） */
+const GAIN = 2;
 /** 基準點慢慢跟上目前角度（感測器約每秒 60 次，約 4 秒追上），手機架固定的角度會自動當成「正面」 */
 const RECENTER = 0.004;
 /** 畫面上的平滑 */
@@ -34,7 +36,7 @@ export function useTilt(ref: RefObject<HTMLElement | null>, enabled: boolean): v
       base.b += (e.beta - base.b) * RECENTER;
       base.g += (e.gamma - base.g) * RECENTER;
       // 往前傾（beta 變小）→ 雷達上緣離你遠一點：rotateX 正值
-      target = { x: clampTilt(base.b - e.beta), y: clampTilt(e.gamma - base.g) };
+      target = { x: clampTilt((base.b - e.beta) * GAIN), y: clampTilt((e.gamma - base.g) * GAIN) };
     };
     const frame = () => {
       shown.x += (target.x - shown.x) * SMOOTH;
