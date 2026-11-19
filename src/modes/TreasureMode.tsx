@@ -1,29 +1,40 @@
-// 尋寶遊戲畫面
+// 尋寶遊戲畫面：一打開就在身邊撒七個寶物，範圍用雷達的縮放鈕看，不用選。
 import { useEffect, useMemo, useRef, useState } from 'preact/hooks';
 import { onFix } from '../sensors/gps';
 import { playCollect } from '../radar/radarSound';
+import { look } from '../radar/Radar';
+import { distanceM, fmtDist } from '../radar/geo';
 import { Dialog } from '../ui/Dialog';
 import { GPS_TEXT, load, save, useFix, useGpsStatus, vibrate } from '../ui/common';
 import { Pointer, RadarScreen } from '../ui/RadarScreen';
-import { RANGES, TREASURE_COUNT, collect, remaining, scatter, type Hunt, type Treasure } from './treasure';
+import { GOOD_ACCURACY_M, HUNT_RADIUS_M, TOO_FAR_M, TREASURE_COUNT, collect, coverKm, remaining, scatter, type Hunt, type Treasure } from './treasure';
 
 const HUNT_KEY = 'fe-hunt';
-const RANGE_KEY = 'fe-hunt-range';
 
 export function TreasureMode() {
   const fix = useFix();
   const gps = useGpsStatus();
   const [hunt, setHunt] = useState<Hunt | null>(() => load<Hunt | null>(HUNT_KEY, null));
-  const [rangeM, setRangeM] = useState<number>(() => load(RANGE_KEY, 800));
   const [got, setGot] = useState<Treasure[] | null>(null);
-  const [setup, setSetup] = useState(false);
   const huntRef = useRef(hunt);
   huntRef.current = hunt;
 
   const update = (h: Hunt | null) => {
+    huntRef.current = h;
     save(HUNT_KEY, h);
     setHunt(h);
   };
+  const start = () => {
+    if (!fix) return;
+    update(scatter(fix, HUNT_RADIUS_M, Date.now()));
+    setGot(null);
+  };
+
+  // 還沒開始：等定位夠準（剛打開時常先拿到誤差好幾百公尺的網路定位）就自動撒
+  const accurate = !!fix && fix.accuracy <= GOOD_ACCURACY_M;
+  useEffect(() => {
+    if (!hunt && accurate) start();
+  }, [!hunt && accurate]);
 
   // 每一筆定位都檢查有沒有走到寶物旁邊
   useEffect(
@@ -33,7 +44,6 @@ export function TreasureMode() {
         if (!h) return;
         const r = collect(h, f, Date.now());
         if (!r.got.length) return;
-        huntRef.current = r.hunt;
         update(r.hunt);
         setGot(r.got);
         playCollect();
@@ -42,103 +52,60 @@ export function TreasureMode() {
     [],
   );
 
-  const start = (m: number) => {
-    if (!fix) return;
-    save(RANGE_KEY, m);
-    setRangeM(m);
-    update(scatter(fix, m, Date.now()));
-    setSetup(false);
-    setGot(null);
-  };
-
   const left = useMemo(() => (hunt ? remaining(hunt) : []), [hunt]);
   const found = hunt ? TREASURE_COUNT - left.length : 0;
-  const nearest = useMemo(() => {
-    if (!fix || !left.length) return null;
-    let best: Treasure | null = null;
-    let bestD = Infinity;
-    for (const t of left) {
-      const d = Math.hypot(t.lat - fix.lat, (t.lon - fix.lon) * Math.cos((fix.lat * Math.PI) / 180));
-      if (d < bestD) [best, bestD] = [t, d];
-    }
-    return best;
-  }, [fix, left]);
-  const maxKm = Math.max(0.5, ((hunt?.radiusM ?? rangeM) * 1.25) / 1000);
+  const seen = useMemo(() => (fix ? look(fix, left) : []), [fix, left]);
+  const nearest = seen[0]?.t ?? null;
+  // 範圍一定蓋得到最遠的寶物，按縮放鈕再往內看
+  const maxKm = coverKm(seen.at(-1)?.distM ?? 0);
+  const tooFar = !!fix && !!hunt && left.length > 0 && distanceM(hunt.center, fix) > TOO_FAR_M;
 
   let top;
-  if (!fix) {
-    top = <section class="radar-card muted">{GPS_TEXT[gps] || '等待定位…'}</section>;
-  } else if (!hunt) {
+  if (!fix || !hunt) {
+    top = <section class="radar-card muted">{fix ? `定位中…（誤差 ${Math.round(fix.accuracy)} m，等準一點再撒寶物）` : GPS_TEXT[gps] || '等待定位…'}</section>;
+  } else if (tooFar) {
     top = (
       <section class="radar-card">
-        <div class="radar-main">撒七個寶物在你附近</div>
-        <div class="radar-sub">選一個範圍，走過去把它們全部撿回來</div>
-        <RangeChips value={rangeM} onPick={start} />
+        <div class="radar-main">寶物都在 {fmtDist(seen[0]!.distM)} 外</div>
+        <div class="radar-sub">你離上次撒寶物的地方太遠了</div>
+        <button type="button" class="btn primary small-btn top-gap" onClick={start}>
+          在這裡重新撒
+        </button>
       </section>
     );
   } else if (nearest) {
-    top = (
-      <div class="card-stack">
-        <Pointer me={fix} to={nearest} title="最近的寶物" sub={`已找到 ${found} / ${TREASURE_COUNT}`} />
-        <button type="button" class="link-btn" onClick={() => setSetup(true)}>
-          重新撒一次
-        </button>
-      </div>
-    );
+    top = <Pointer me={fix} to={nearest} title="最近的寶物" sub={`已找到 ${found} / ${TREASURE_COUNT}`} />;
   } else {
     top = (
       <section class="radar-card">
         <div class="radar-main">七顆全部到齊！</div>
-        <div class="radar-sub">再撒一輪？</div>
-        <RangeChips value={rangeM} onPick={start} />
+        <button type="button" class="btn primary small-btn top-gap" onClick={start}>
+          再來一輪
+        </button>
       </section>
     );
   }
 
   return (
     <>
-      <RadarScreen
-        radarKey={`hunt-${hunt?.startedAt ?? 0}`}
-        me={fix}
-        targets={left}
-        bestId={nearest?.id ?? null}
-        maxKm={maxKm}
-        top={top}
-        foot={hunt ? `尋寶・範圍 ${hunt.radiusM >= 1000 ? `${hunt.radiusM / 1000} km` : `${hunt.radiusM} m`}` : '尋寶'}
-      />
+      <RadarScreen radarKey={`hunt-${hunt?.startedAt ?? 0}`} me={fix} targets={left} bestId={nearest?.id ?? null} maxKm={maxKm} autoFit={false} top={top} foot="尋寶" />
       {got && (
         <Dialog title={left.length ? `找到第 ${got.map((t) => t.n).join('、')} 顆！` : '七顆全部到齊！'} onClose={() => setGot(null)}>
           <p class="big-emoji" aria-hidden="true">
             {left.length ? '✨' : '🎉'}
           </p>
-          <p>{left.length ? `還差 ${left.length} 顆，雷達上找找看。` : '大長老感應到你的努力了。要再來一輪嗎？'}</p>
+          <p>{left.length ? `還差 ${left.length} 顆，雷達上找找看。` : '大長老感應到你的努力了。'}</p>
           {left.length ? (
             <button type="button" class="btn primary" onClick={() => setGot(null)}>
               繼續找
             </button>
           ) : (
-            <RangeChips value={rangeM} onPick={start} />
+            <button type="button" class="btn primary" onClick={start}>
+              再來一輪
+            </button>
           )}
         </Dialog>
       )}
-      {setup && (
-        <Dialog title="重新撒一次" onClose={() => setSetup(false)}>
-          <p>目前找到的會清掉，在你現在的位置周圍重新撒七個。</p>
-          <RangeChips value={rangeM} onPick={start} />
-        </Dialog>
-      )}
     </>
-  );
-}
-
-function RangeChips(props: { value: number; onPick: (m: number) => void }) {
-  return (
-    <div class="chips range-chips">
-      {RANGES.map((r) => (
-        <button key={r.m} type="button" class={`chip${props.value === r.m ? ' active' : ''}`} onClick={() => props.onPick(r.m)}>
-          {r.label}
-        </button>
-      ))}
-    </div>
   );
 }

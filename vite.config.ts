@@ -17,8 +17,8 @@ export default defineConfig({
         scope: '/find-elder/',
         display: 'standalone',
         orientation: 'portrait',
-        background_color: '#0c0d0f',
-        theme_color: '#0c0d0f',
+        background_color: '#05100a',
+        theme_color: '#05100a',
         icons: [
           { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icon-512.png', sizes: '512x512', type: 'image/png' },
@@ -29,6 +29,14 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
         navigateFallback: '/find-elder/index.html',
         // 新版一裝好就接手，手機重開 App 就是最新版
+        // 好吃的方格資料：用過的存起來，沒網路也看得到；有網路時背景更新
+        runtimeCaching: [
+          {
+            urlPattern: /\/find-elder\/food\/.*\.json$/,
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: 'food-tiles', expiration: { maxEntries: 400 } },
+          },
+        ],
         skipWaiting: true,
         clientsClaim: true,
       },

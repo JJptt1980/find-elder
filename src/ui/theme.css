@@ -213,7 +213,8 @@ body { overflow-x: hidden; }
 /* 雷達頁固定一個螢幕高、不捲動：卡片和小字照內容高，剩下的空間全部給雷達，底部留位置給縮放鈕 */
 .app.fit { height: 100dvh; overflow: hidden; }
 .app.fit .topbar { display: none; } /* 雷達頁不放大標題，空間留給雷達和按鈕 */
-.app.fit .page { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-top: calc(env(safe-area-inset-top) + 14px); padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 8px); }
+/* 底部留 64px 給縮放鈕的圓盤，雷達不會被它蓋住（不論有沒有瀏覽器網址列） */
+.app.fit .page { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-top: calc(env(safe-area-inset-top) + 14px); padding-bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) + 64px); }
 .app.fit .radar-page { flex: 1; min-height: 0; }
 .radar-card { background: var(--surface); border-radius: var(--radius); padding: 16px 18px; box-shadow: var(--shadow); }
 .card-stack { display: flex; flex-direction: column; gap: 8px; }
@@ -338,7 +339,7 @@ body { overflow-x: hidden; }
 /* 正下方：不旋轉，從分頁列後面冒出圓盤和一點點柱子 */
 .radar-zoom.zoom-bc {
   left: 50%;
-  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) - 56px);
+  bottom: calc(var(--tabbar-h) + env(safe-area-inset-bottom) - 92px);
   transform: translateX(-50%);
 }
 
@@ -409,3 +410,4 @@ body { overflow-x: hidden; }
 .picker-foot { padding: 10px 12px calc(env(safe-area-inset-bottom) + 10px); }
 .picker-foot .btn { width: 100%; }
 .leaflet-container { font: inherit; }
+.top-gap { margin-top: 12px; width: 100%; }

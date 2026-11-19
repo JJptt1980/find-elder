@@ -33,7 +33,7 @@ export function FoodMode() {
     setBusy(true);
     setError(null);
     fetchPlaces(at, ctl.signal)
-      .then((places) => {
+      .then(({ places }) => {
         const c = { at: { lat: at.lat, lon: at.lon }, places };
         save(CACHE_KEY, c);
         setCache(c);

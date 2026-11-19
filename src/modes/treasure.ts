@@ -17,11 +17,22 @@ export interface Hunt {
 }
 
 export const TREASURE_COUNT = 7;
-export const RANGES = [
-  { m: 300, label: '近 300 m' },
-  { m: 800, label: '中 800 m' },
-  { m: 2000, label: '遠 2 km' },
-] as const;
+/** 撒在身邊多遠以內（公尺） */
+export const HUNT_RADIUS_M = 800;
+/** 定位誤差在這以內才撒，免得用到剛打開時不準的網路定位 */
+export const GOOD_ACCURACY_M = 100;
+/** 離撒寶物的地方這麼遠，就讓使用者在新的位置重撒 */
+export const TOO_FAR_M = 3000;
+
+/**
+ * 雷達最大範圍：一定蓋得到最遠的那顆（留 15% 邊），至少 1 公里。
+ * 取好讀的數字，縮放鈕的三段是它的 1、1/2、1/4。
+ */
+export function coverKm(farthestM: number): number {
+  const need = Math.max(1, (farthestM / 1000) * 1.15);
+  for (const r of [1, 1.5, 2, 3, 5, 10, 20, 50, 100, 200, 500, 1000, 5000]) if (r >= need) return r;
+  return 20000;
+}
 
 /**
  * 在 center 周圍撒 count 個：距離在半徑的 25%～100% 之間（面積平均，不會擠在中間），

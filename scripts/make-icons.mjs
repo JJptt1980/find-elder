@@ -1,10 +1,10 @@
 // 產生 PWA 圖示（PNG），不依賴任何外部套件。
-// 圖樣：深色底、琥珀色同心圓與掃描扇形的簡單雷達。
+// 圖樣：深色底、螢光綠同心圓與掃描扇形的簡單雷達。
 import { writeFileSync } from 'node:fs';
 import { deflateSync } from 'node:zlib';
 
-const BG = [20, 12, 4];
-const GREEN = [255, 190, 50];
+const BG = [5, 16, 10];
+const GREEN = [57, 255, 122];
 
 function crc32(buf) {
   let c = ~0;

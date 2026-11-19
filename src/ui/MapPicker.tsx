@@ -2,28 +2,10 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useEffect, useRef, useState } from 'preact/hooks';
-import type { LatLon } from '../radar/geo';
-
-interface Hit {
-  name: string;
-  full: string;
-  lat: number;
-  lon: number;
-}
+import { fmtDist, type LatLon } from '../radar/geo';
+import { searchPlaces, type Hit } from './geocode';
 
 const TAIWAN: LatLon = { lat: 23.7, lon: 121 };
-
-async function search(q: string, near: LatLon | null): Promise<Hit[]> {
-  const params = new URLSearchParams({ q, format: 'jsonv2', limit: '6', 'accept-language': 'zh-TW' });
-  if (near) {
-    // 優先找附近的（約 ±0.5 度），找不到 Nominatim 還是會給遠的
-    params.set('viewbox', `${near.lon - 0.5},${near.lat + 0.5},${near.lon + 0.5},${near.lat - 0.5}`);
-  }
-  const res = await fetch(`https://nominatim.openstreetmap.org/search?${params}`);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const rows = (await res.json()) as { name?: string; display_name: string; lat: string; lon: string }[];
-  return rows.map((r) => ({ name: r.name || r.display_name.split(',')[0]!, full: r.display_name, lat: +r.lat, lon: +r.lon }));
-}
 
 export function MapPicker(props: { me: LatLon | null; onPick: (at: LatLon, name: string) => void; onClose: () => void }) {
   const box = useRef<HTMLDivElement>(null);
@@ -65,8 +47,13 @@ export function MapPicker(props: { me: LatLon | null; onPick: (at: LatLon, name:
     e.preventDefault();
     if (!q.trim()) return;
     setMsg('搜尋中…');
+    setHits(null);
     try {
-      const r = await search(q.trim(), props.me);
+      const ctl = new AbortController();
+      setTimeout(() => ctl.abort(), 8000);
+      // 以地圖目前看的地方為中心找（還沒移動地圖時就是你的位置）
+      const c = map.current?.getCenter();
+      const r = await searchPlaces(q.trim(), c ? { lat: c.lat, lon: c.lng } : props.me, ctl.signal);
       setHits(r);
       setMsg(r.length ? null : '找不到，換個關鍵字，或直接在地圖上點');
     } catch {
@@ -100,7 +87,10 @@ export function MapPicker(props: { me: LatLon | null; onPick: (at: LatLon, name:
               }}
             >
               <b>{h.name}</b>
-              <span>{h.full}</span>
+              <span>
+                {h.distM != null && `${fmtDist(h.distM)}・`}
+                {h.full}
+              </span>
             </button>
           ))}
         </div>

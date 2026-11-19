@@ -12,6 +12,7 @@ export function RadarScreen<T extends Target>(props: {
   bestId?: string | null;
   maxKm: number;
   showLabels?: boolean;
+  autoFit?: boolean;
   /** 要嗶嗶提醒的目標；沒給就是全部 */
   beepTargets?: readonly T[];
   onPick?: (t: T, count: number) => void;
@@ -37,6 +38,7 @@ export function RadarScreen<T extends Target>(props: {
         heading={heading.deg}
         maxKm={props.maxKm}
         showLabels={props.showLabels}
+        autoFit={props.autoFit}
         sound={sound}
         onPick={props.onPick}
       >

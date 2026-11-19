@@ -115,6 +115,8 @@ export function Radar<T extends Target>(props: {
   heading: number | null;
   maxKm: number;
   showLabels?: boolean;
+  /** 自動放大到剛好看得到最近幾個點；關掉就從最大範圍（看得到全部）開始 */
+  autoFit?: boolean;
   sound: boolean;
   onPick?: (t: T, count: number) => void;
   children?: ComponentChildren;
@@ -135,7 +137,7 @@ export function Radar<T extends Target>(props: {
   const hasMe = !!props.me;
   useEffect(() => {
     const me = latest.current.me;
-    if (userZoomed.current || !me || !props.targets.length) {
+    if (userZoomed.current || !me || !props.targets.length || props.autoFit === false) {
       if (!userZoomed.current) zoom.current.target = props.maxKm;
       return;
     }
@@ -146,7 +148,7 @@ export function Radar<T extends Target>(props: {
       best ? best.distM / 1000 : null,
       props.maxKm,
     );
-  }, [props.targets, props.bestId, props.maxKm, hasMe]);
+  }, [props.targets, props.bestId, props.maxKm, hasMe, props.autoFit]);
 
   useEffect(() => {
     const canvas = ref.current!;

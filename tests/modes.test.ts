@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { destination, distanceM, bearingDeg } from '../src/radar/geo';
-import { collect, pickRadius, remaining, scatter } from '../src/modes/treasure';
+import { collect, coverKm, pickRadius, remaining, scatter } from '../src/modes/treasure';
+import { rank, variants } from '../src/ui/geocode';
 import {
   DRAGON_LIMIT,
   addGroup,
@@ -12,7 +13,7 @@ import {
   removeGroup,
   type SpotBook,
 } from '../src/modes/spots';
-import { buildQuery, parsePlaces, shortName } from '../src/modes/food';
+import { buildQuery, parsePlaces, rowToPlace, shortName, tileKey, tilesAround } from '../src/modes/food';
 import { compassFromAlpha, smoothAngle } from '../src/sensors/heading';
 
 const HOME = { lat: 24.99, lon: 121.3 };
@@ -136,5 +137,47 @@ describe('好吃的', () => {
   it('名字太長會截短', () => {
     expect(shortName('一二三四五六七八九十')).toBe('一二三四五六七…');
     expect(shortName('短')).toBe('短');
+  });
+});
+
+describe('尋寶範圍', () => {
+  it('雷達一定蓋得到最遠的寶物，至少 1 公里', () => {
+    expect([coverKm(0), coverKm(800), coverKm(1200), coverKm(4000)]).toEqual([1, 1, 1.5, 5]);
+  });
+});
+
+describe('好吃的方格資料', () => {
+  it('格子編號與身邊 1 公里碰到的格子', () => {
+    expect(tileKey(25.0339, 121.5645, 0.02)).toBe('1251_6078');
+    const keys = tilesAround({ lat: 25.0339, lon: 121.5645 }, 1000, 0.02);
+    expect(keys).toContain('1251_6078');
+    expect(keys.length).toBeGreaterThanOrEqual(1);
+    expect(keys.length).toBeLessThanOrEqual(4);
+  });
+  it('方格一列轉成店家', () => {
+    expect(rowToPlace([25, 121, '阿婆麵', 'f', 'noodle'])).toMatchObject({ kind: 'snack', amenity: 'fast_food', cuisine: 'noodle' });
+    expect(rowToPlace([25, 121, '麵包', 'b'])).toMatchObject({ kind: 'cafe', amenity: 'bakery' });
+    expect(rowToPlace([25, 121, '?', 'z'])).toBeNull();
+  });
+});
+
+describe('地名搜尋', () => {
+  it('一零一、臺／台、大樓都換成找得到的寫法', () => {
+    expect(variants('一零一大樓')).toEqual(expect.arrayContaining(['101大樓', '101']));
+    expect(variants('臺北101')).toContain('台北101');
+    expect(variants('101')).toContain('台北101');
+    expect(variants('101大樓')).toContain('台北101');
+    const h = (name: string, distM: number) => ({ name, full: '', lat: 25, lon: 121 + distM / 1e5, distM });
+    expect(rank([h('101', 21_500), h('101國際購物中心', 130)], '101')[0]!.name).toBe('101國際購物中心');
+  });
+  it('名字像不像和距離一起算：一模一樣但很遠的，排在包含而且就在旁邊的後面', () => {
+    const h = (name: string, distM: number) => ({ name, full: '', lat: 25, lon: 121 + distM / 1e5, distM });
+    const r = rank([h('台北101/世貿', 100), h('台北101', 900), h('台北101', 50), h('隨便', 10)], '台北101');
+    expect(r.map((x) => [x.name, x.distM])).toEqual([
+      ['台北101', 50],
+      ['台北101/世貿', 100],
+      ['台北101', 900],
+      ['隨便', 10],
+    ]);
   });
 });
