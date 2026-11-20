@@ -7,9 +7,11 @@ import { distanceM, fmtDist } from '../radar/geo';
 import { Dialog } from '../ui/Dialog';
 import { GPS_TEXT, load, save, useFix, useGpsStatus, vibrate } from '../ui/common';
 import { Pointer, RadarScreen } from '../ui/RadarScreen';
-import { GOOD_ACCURACY_M, HUNT_RADIUS_M, TOO_FAR_M, TREASURE_COUNT, collect, coverKm, remaining, scatter, type Hunt, type Treasure } from './treasure';
+import { Summon, type SummonInfo } from './Summon';
+import { GOOD_ACCURACY_M, HUNT_RADIUS_M, TOO_FAR_M, TREASURE_COUNT, collect, coverKm, emptySaga, finishRound, remaining, roundStats, scatter, type Hunt, type Saga, type Treasure } from './treasure';
 
 const HUNT_KEY = 'fe-hunt';
+const SAGA_KEY = 'fe-saga';
 
 export function TreasureMode() {
   const fix = useFix();
@@ -17,6 +19,7 @@ export function TreasureMode() {
   const [hunt, setHunt] = useState<Hunt | null>(() => load<Hunt | null>(HUNT_KEY, null));
   const [got, setGot] = useState<Treasure[] | null>(null);
   const [askReset, setAskReset] = useState(false);
+  const [summon, setSummon] = useState<SummonInfo | null>(null);
   const huntRef = useRef(hunt);
   huntRef.current = hunt;
 
@@ -30,6 +33,7 @@ export function TreasureMode() {
     update(scatter(fix, HUNT_RADIUS_M, Date.now()));
     setGot(null);
     setAskReset(false);
+    setSummon(null);
   };
 
   // 還沒開始：等定位夠準（剛打開時常先拿到誤差好幾百公尺的網路定位）就自動撒
@@ -47,9 +51,17 @@ export function TreasureMode() {
         const r = collect(h, f, Date.now());
         if (!r.got.length) return;
         update(r.hunt);
-        setGot(r.got);
         playCollect();
-        vibrate([80, 60, 80, 60, 200]);
+        if (remaining(r.hunt).length) {
+          setGot(r.got);
+          vibrate([80, 60, 80, 60, 200]);
+          return;
+        }
+        // 七顆到齊：輪到下一個結局，播召喚演出
+        const done = finishRound(load<Saga>(SAGA_KEY, emptySaga()));
+        save(SAGA_KEY, done.saga);
+        setGot(null); // 前一顆的「找到第 N 顆」對話框還開著的話一起關掉
+        setSummon({ ending: done.ending, completedAll: done.completedAll, rounds: done.saga.rounds, ...roundStats(r.hunt) });
       }),
     [],
   );
@@ -127,6 +139,7 @@ export function TreasureMode() {
           </div>
         </Dialog>
       )}
+      {summon && <Summon info={summon} onAgain={start} onClose={() => setSummon(null)} />}
       {got && (
         <Dialog title={left.length ? `找到第 ${got.map((t) => t.n).join('、')} 顆！` : '七顆全部到齊！'} onClose={() => setGot(null)}>
           <p class="big-emoji" aria-hidden="true">

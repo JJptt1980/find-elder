@@ -75,3 +75,42 @@ export function collect(hunt: Hunt, at: LatLon & { accuracy: number }, now: numb
 }
 
 export const remaining = (hunt: Hunt): Treasure[] => hunt.items.filter((t) => !t.foundAt);
+
+// ---------- 七顆到齊後的召喚結局 ----------
+
+/** 四種結局，照這個順序輪流出現 */
+export const ENDINGS = ['undies', 'busy', 'power', 'nothing'] as const;
+export type Ending = (typeof ENDINGS)[number];
+
+/** 存在手機裡的破關紀錄 */
+export interface Saga {
+  /** 總共破了幾輪 */
+  rounds: number;
+  /** 下一次輪到 ENDINGS 的第幾個 */
+  next: number;
+  /** 看過哪些結局 */
+  seen: Ending[];
+}
+
+export const emptySaga = (): Saga => ({ rounds: 0, next: 0, seen: [] });
+
+/** 破一輪：輪到哪個結局、這次是不是剛好湊滿四種 */
+export function finishRound(s: Saga): { saga: Saga; ending: Ending; completedAll: boolean } {
+  const ending = ENDINGS[s.next % ENDINGS.length]!;
+  const seen = s.seen.includes(ending) ? s.seen : [...s.seen, ending];
+  const completedAll = s.seen.length < ENDINGS.length && seen.length === ENDINGS.length;
+  return { saga: { rounds: s.rounds + 1, next: (s.next + 1) % ENDINGS.length, seen }, ending, completedAll };
+}
+
+/** 這一輪的成績：照撿到的順序，從撒寶物的地方一顆一顆走直線，至少走了多遠；花了多久 */
+export function roundStats(hunt: Hunt): { walkedM: number; ms: number } {
+  const order = hunt.items.filter((t) => t.foundAt).sort((a, b) => a.foundAt! - b.foundAt!);
+  let walkedM = 0;
+  let at: LatLon = hunt.center;
+  for (const t of order) {
+    walkedM += distanceM(at, t);
+    at = t;
+  }
+  const last = order.at(-1)?.foundAt ?? hunt.startedAt;
+  return { walkedM, ms: Math.max(0, last - hunt.startedAt) };
+}

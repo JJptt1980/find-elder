@@ -95,3 +95,31 @@ export function playCollect(): void {
   const t = a.currentTime + 0.01;
   [1318, 1568, 1976, 2637].forEach((f, i) => beep(a, t + i * 0.09, f, i === 3 ? 0.28 : 0.08));
 }
+
+/** 召喚的地鳴：很低的聲音慢慢變大、變高，seconds 秒後收掉；回傳提早停掉的函式 */
+export function playRumble(seconds: number): () => void {
+  const a = audio();
+  if (!a) return () => {};
+  const t = a.currentTime + 0.01;
+  const o = a.createOscillator();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(38, t);
+  o.frequency.linearRampToValueAtTime(70, t + seconds);
+  const lp = a.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 180;
+  const g = a.createGain();
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.35, t + seconds * 0.9);
+  g.gain.linearRampToValueAtTime(0, t + seconds);
+  o.connect(lp).connect(g).connect(a.destination);
+  o.start(t);
+  o.stop(t + seconds + 0.05);
+  return () => {
+    try {
+      o.stop();
+    } catch {
+      // 已經停了
+    }
+  };
+}

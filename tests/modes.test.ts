@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { destination, distanceM, bearingDeg } from '../src/radar/geo';
-import { collect, coverKm, pickRadius, remaining, scatter } from '../src/modes/treasure';
+import { ENDINGS, collect, coverKm, emptySaga, finishRound, pickRadius, remaining, roundStats, scatter } from '../src/modes/treasure';
 import { rank, variants } from '../src/ui/geocode';
 import {
   DRAGON_LIMIT,
@@ -189,5 +189,47 @@ describe('地名搜尋', () => {
       ['台北101', 900],
       ['隨便', 10],
     ]);
+  });
+});
+
+describe('召喚結局', () => {
+  it('四種結局照順序輪流，第五輪回到第一種', () => {
+    let saga = emptySaga();
+    const got: string[] = [];
+    for (let i = 0; i < 5; i++) {
+      const r = finishRound(saga);
+      got.push(r.ending);
+      saga = r.saga;
+    }
+    expect(got).toEqual([...ENDINGS, ENDINGS[0]]);
+    expect(saga.rounds).toBe(5);
+  });
+
+  it('湊滿四種的恭喜只出現一次', () => {
+    let saga = emptySaga();
+    const flags: boolean[] = [];
+    for (let i = 0; i < 9; i++) {
+      const r = finishRound(saga);
+      flags.push(r.completedAll);
+      saga = r.saga;
+    }
+    expect(flags).toEqual([false, false, false, true, false, false, false, false, false]);
+  });
+
+  it('roundStats 照撿到的順序算直線距離和時間', () => {
+    const a = destination(HOME, 0, 100);
+    const b = destination(a, 90, 200);
+    const hunt = {
+      center: HOME,
+      radiusM: 800,
+      startedAt: 1000,
+      items: [
+        { id: 'b', n: 2, ...b, foundAt: 9000 },
+        { id: 'a', n: 1, ...a, foundAt: 5000 },
+      ],
+    };
+    const s = roundStats(hunt);
+    expect(s.walkedM).toBeCloseTo(300, 0);
+    expect(s.ms).toBe(8000);
   });
 });
