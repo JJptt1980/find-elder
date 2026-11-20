@@ -8,10 +8,11 @@ import { Dialog } from '../ui/Dialog';
 import { GPS_TEXT, load, save, useFix, useGpsStatus, vibrate } from '../ui/common';
 import { Pointer, RadarScreen } from '../ui/RadarScreen';
 import { Summon, type SummonInfo } from './Summon';
-import { GOOD_ACCURACY_M, HUNT_RADIUS_M, TOO_FAR_M, TREASURE_COUNT, collect, coverKm, emptySaga, finishRound, remaining, roundStats, scatter, type Hunt, type Saga, type Treasure } from './treasure';
+import { GOOD_ACCURACY_M, HUNT_RADIUS_M, HUNT_SIZES, TOO_FAR_M, TREASURE_COUNT, collect, coverKm, emptySaga, finishRound, remaining, roundStats, scatter, type Hunt, type Saga, type Treasure } from './treasure';
 
 const HUNT_KEY = 'fe-hunt';
 const SAGA_KEY = 'fe-saga';
+const SIZE_KEY = 'fe-hunt-size';
 
 export function TreasureMode() {
   const fix = useFix();
@@ -19,6 +20,8 @@ export function TreasureMode() {
   const [hunt, setHunt] = useState<Hunt | null>(() => load<Hunt | null>(HUNT_KEY, null));
   const [got, setGot] = useState<Treasure[] | null>(null);
   const [askReset, setAskReset] = useState(false);
+  // 撒多大範圍：玩家選過就記住
+  const [size, setSize] = useState<number>(() => load<number>(SIZE_KEY, HUNT_RADIUS_M));
   const [summon, setSummon] = useState<SummonInfo | null>(null);
   const huntRef = useRef(hunt);
   huntRef.current = hunt;
@@ -28,9 +31,13 @@ export function TreasureMode() {
     save(HUNT_KEY, h);
     setHunt(h);
   };
-  const start = () => {
+  const pickSize = (m: number) => {
+    save(SIZE_KEY, m);
+    setSize(m);
+  };
+  const start = (radiusM = size) => {
     if (!fix) return;
-    update(scatter(fix, HUNT_RADIUS_M, Date.now()));
+    update(scatter(fix, radiusM, Date.now()));
     setGot(null);
     setAskReset(false);
     setSummon(null);
@@ -82,7 +89,7 @@ export function TreasureMode() {
       <section class="radar-card">
         <div class="radar-main">寶物都在 {fmtDist(seen[0]!.distM)} 外</div>
         <div class="radar-sub">你離上次撒寶物的地方太遠了</div>
-        <button type="button" class="btn primary small-btn top-gap" onClick={start}>
+        <button type="button" class="btn primary small-btn top-gap" onClick={() => start()}>
           在這裡重新撒
         </button>
       </section>
@@ -93,7 +100,7 @@ export function TreasureMode() {
     top = (
       <section class="radar-card">
         <div class="radar-main">七顆全部到齊！</div>
-        <button type="button" class="btn primary small-btn top-gap" onClick={start}>
+        <button type="button" class="btn primary small-btn top-gap" onClick={() => start()}>
           再來一輪
         </button>
       </section>
@@ -127,19 +134,26 @@ export function TreasureMode() {
       {askReset && (
         <Dialog title="重新撒寶物？" onClose={() => setAskReset(false)}>
           <p>
-            {found > 0 ? `已經找到的 ${found} 顆會清掉，` : ''}在你現在的位置周圍重新撒七顆。
+            {found > 0 ? `已經找到的 ${found} 顆會清掉，` : ''}在你現在的位置周圍重新撒七顆。撒多遠？
           </p>
+          <div class="chips">
+            {HUNT_SIZES.map((m) => (
+              <button key={m} type="button" class={`chip${size === m ? ' active' : ''}`} onClick={() => pickSize(m)}>
+                {m} 公尺
+              </button>
+            ))}
+          </div>
           <div class="btn-row">
             <button type="button" class="btn secondary" onClick={() => setAskReset(false)}>
               取消
             </button>
-            <button type="button" class="btn danger" onClick={start}>
+            <button type="button" class="btn danger" onClick={() => start()}>
               確定重撒
             </button>
           </div>
         </Dialog>
       )}
-      {summon && <Summon info={summon} onAgain={start} onClose={() => setSummon(null)} />}
+      {summon && <Summon info={summon} onAgain={() => start()} onClose={() => setSummon(null)} />}
       {got && (
         <Dialog title={left.length ? `找到第 ${got.map((t) => t.n).join('、')} 顆！` : '七顆全部到齊！'} onClose={() => setGot(null)}>
           <p class="big-emoji" aria-hidden="true">
@@ -151,7 +165,7 @@ export function TreasureMode() {
               繼續找
             </button>
           ) : (
-            <button type="button" class="btn primary" onClick={start}>
+            <button type="button" class="btn primary" onClick={() => start()}>
               再來一輪
             </button>
           )}

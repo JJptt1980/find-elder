@@ -55,6 +55,17 @@ describe('尋寶', () => {
       for (const a of h.items) for (const b of h.items) if (a !== b) expect(distanceM(a, b)).toBeGreaterThanOrEqual(120 - 1);
     }
   });
+  it('100 公尺的小範圍：離自己、兩顆之間都至少 30 公尺', () => {
+    for (const seed of [1, 2, 3, 42, 99]) {
+      const h = scatter(HOME, 100, 1, seeded(seed));
+      expect(h.items).toHaveLength(7);
+      for (const a of h.items) {
+        expect(distanceM(HOME, a)).toBeGreaterThanOrEqual(29);
+        expect(distanceM(HOME, a)).toBeLessThanOrEqual(101);
+        for (const b of h.items) if (a !== b) expect(distanceM(a, b)).toBeGreaterThanOrEqual(29);
+      }
+    }
+  });
   it('不會每次都平均分在七個方向', () => {
     // 換幾種亂數，至少有一次某個 1/7 扇區放了兩顆以上
     const crowded = [1, 2, 3, 4, 5, 6, 7, 8].some((seed) => {
@@ -152,7 +163,7 @@ describe('好吃的', () => {
 
 describe('尋寶範圍', () => {
   it('雷達一定蓋得到最遠的寶物，至少 1 公里', () => {
-    expect([coverKm(0), coverKm(800), coverKm(1200), coverKm(4000)]).toEqual([1, 1, 1.5, 5]);
+    expect([coverKm(0), coverKm(100), coverKm(300), coverKm(800), coverKm(1200), coverKm(4000)]).toEqual([0.3, 0.3, 0.5, 1, 1.5, 5]);
   });
 });
 

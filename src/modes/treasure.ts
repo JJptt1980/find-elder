@@ -17,20 +17,23 @@ export interface Hunt {
 }
 
 export const TREASURE_COUNT = 7;
-/** 撒在身邊多遠以內（公尺） */
-export const HUNT_RADIUS_M = 800;
+/** 撒在身邊多遠以內（公尺）：玩家自己選，預設 300 */
+export const HUNT_SIZES = [100, 300, 800] as const;
+export const HUNT_RADIUS_M = 300;
+/** 最近、兩顆之間最少隔這麼遠（公尺），小範圍時才不會一走出去就撿到、一次撿兩顆 */
+export const MIN_SPACING_M = 30;
 /** 定位誤差在這以內才撒，免得用到剛打開時不準的網路定位 */
 export const GOOD_ACCURACY_M = 100;
 /** 離撒寶物的地方這麼遠，就讓使用者在新的位置重撒 */
 export const TOO_FAR_M = 3000;
 
 /**
- * 雷達最大範圍：一定蓋得到最遠的那顆（留 15% 邊），至少 1 公里。
+ * 雷達最大範圍：一定蓋得到最遠的那顆（留 15% 邊），至少 300 公尺。
  * 取好讀的數字，縮放鈕的三段是它的 1、1/2、1/4。
  */
 export function coverKm(farthestM: number): number {
-  const need = Math.max(1, (farthestM / 1000) * 1.15);
-  for (const r of [1, 1.5, 2, 3, 5, 10, 20, 50, 100, 200, 500, 1000, 5000]) if (r >= need) return r;
+  const need = Math.max(0.3, (farthestM / 1000) * 1.15);
+  for (const r of [0.3, 0.5, 1, 1.5, 2, 3, 5, 10, 20, 50, 100, 200, 500, 1000, 5000]) if (r >= need) return r;
   return 20000;
 }
 
@@ -42,8 +45,8 @@ export const MIN_GAP = 0.15;
  * 唯一的限制是兩顆不能太近；所以有時候會好幾顆擠在同一邊、某一邊空空的，看起來才像真的亂撒。
  */
 export function scatter(center: LatLon, radiusM: number, now: number, rand: () => number = Math.random, count = TREASURE_COUNT): Hunt {
-  const minR = radiusM * 0.1;
-  const gap = radiusM * MIN_GAP;
+  const minR = Math.max(radiusM * 0.1, MIN_SPACING_M);
+  const gap = Math.max(radiusM * MIN_GAP, MIN_SPACING_M);
   const items: Treasure[] = [];
   for (let tries = 0; items.length < count && tries < 2000; tries++) {
     const bearing = rand() * 360;
