@@ -1,5 +1,7 @@
 # 尋找大長老
 
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-%E8%AB%8B%E6%88%91%E5%96%9D%E6%9D%AF%E5%92%96%E5%95%A1-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/jjptt1980)
+
 一個好玩的雷達 PWA，雷達視覺來自 [DB-radar](https://github.com/JJptt1980/DB-radar)。
 
 - **尋寶**：在身邊撒七個寶物，走過去撿。
