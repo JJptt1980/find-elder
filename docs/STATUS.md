@@ -24,7 +24,7 @@
 - 尋寶範圍讓玩家自己選，最小 100 公尺。
 
 ## 下一步
-- 廣宣頁（/promo）：第 1 步完成（README、promo/brief.md、三張截圖、promo/prompts/chatgpt.md 已複製到剪貼簿；不叫 ChatGPT 生圖，只要文字意見和修正版提示詞）。等使用者貼到 ChatGPT、複製回覆後，再打 /promo 進第 2 步。
+- 廣宣頁（/promo）：第 3 步完成，Muse 定稿（promo/prompts/muse-final.md）使用者已同意。等使用者在 meta.ai 生 hero、og、fb 三張圖並下載到「下載」資料夾，再打 /promo 進第 4 步。
 - 實機（vivo X200 Pro）測試：指南針方向（heading.ts）、召喚演出的震動和地鳴聲。
 - 廣宣系列（JJptt 粉專）：第 1 篇 11/20 已發。第 2～4 篇（私房地圖、好吃的、集滿七顆）使用者已確認全文和配圖，排在 11/21～11/23 每天約 13:20～13:50 自動發（靠原本那個對話的排程，電腦和 Claude App 要開著；漏發就手動補）。素材和佇列在 ~/.claude/projects/-Users-taiwanpapi-find-elder/promo/queue.md（不進 git）。
 
