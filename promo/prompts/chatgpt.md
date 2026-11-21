@@ -8,12 +8,13 @@
 - 語氣：輕鬆、有梗、不浮誇。
 - 主色：雷達綠 #2fd16b；底色深黑綠 #05100a；點綴琥珀 #f5b83d。
 - 視覺：深色背景、發光的綠色圓形雷達、格線、掃描扇形、黃色發光亮點代表寶物。
+- GB子：JJptt 粉專的看板娘，寫實照片風的台灣年輕女生，黑色長直髮、自然瀏海、大眼、溫柔微笑，衣服上有綠色「JJ」字樣臂章。hero 圖要用寫實照片風呈現她。
 - 一定要遵守：不畫任何既有動漫的角色、神龍、龍珠圖案或原作道具外型；人物手上拿的是一般智慧型手機，螢幕是綠色雷達畫面；寶物只畫成發光小圓點或星光；召喚出來的東西永遠不現身。
 
 ## Muse 提示詞初稿
 
 ### 1. hero.png（廣宣頁主視覺，16:9）
-Wide 16:9 illustration, night city park in Taiwan, dark green-black sky. On the left, a cheerful young woman (GB子) holds up a smartphone whose screen shows a glowing green circular radar with grid lines and a sweeping beam. On the right, a 2x2 grid of small comic panels: one person alone, two friends, a couple, and a family with kids, each walking and following a phone radar. Seven small glowing amber dots float in the scene like hidden treasures. Neon radar green #2fd16b accents, soft glow, clean modern anime-inspired style, no text, no existing anime characters, no dragon, no orange balls with stars.
+Wide 16:9 photorealistic image, night city park in Taiwan, dark green-black sky. On the left, GB子 (the JJptt mascot): a young Taiwanese woman with long straight black hair, natural bangs, big eyes and a gentle smile, wearing a green "JJ" armband on her sleeve, holding up a smartphone whose screen faces the camera and shows a glowing green circular radar with grid lines and a sweeping beam. On the right, a 2x2 photo collage: one person alone, two friends, a couple, and a family with kids, each walking outdoors following a phone radar. Seven small glowing amber dots float in the scene like hidden treasures. Neon radar green #2fd16b accents, soft light, face clear, no text or watermark, no existing anime characters, no dragon, no orange balls with stars.
 
 ### 2. og.png（社群分享縮圖，1200x630）
 1200x630 social share image, dark background #05100a. Centered a large glowing green circular radar (grid, sweep beam, center red triangle marker) with seven amber glowing dots scattered around it. Leave clean empty space on the left third for a title to be added later. Minimal, high contrast, slight vignette, no text, no characters.
