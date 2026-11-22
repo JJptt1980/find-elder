@@ -34,7 +34,14 @@ jobs:
       - name: 整理台灣的店家資料（OpenStreetMap）
         run: |
           pip install osmium
-          curl -sSfL -o taiwan.osm.pbf https://download.geofabrik.de/asia/taiwan-latest.osm.pbf
+          # 最新的連結偶爾會指到還沒產生的檔（404），就往前抓前幾天的檔
+          ok=0
+          for f in taiwan-latest $(for n in 1 2 3 4 5; do echo taiwan-$(date -u -d "-$n day" +%y%m%d); done); do
+            if curl -sSfL --retry 2 -o taiwan.osm.pbf "https://download.geofabrik.de/asia/$f.osm.pbf"; then
+              echo "用 $f"; ok=1; break
+            fi
+          done
+          [ "$ok" = 1 ]
           python3 scripts/build-food.py taiwan.osm.pbf public/food
       - run: npm run build
       - uses: actions/configure-pages@v6
