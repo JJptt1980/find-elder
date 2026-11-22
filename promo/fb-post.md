@@ -1,6 +1,6 @@
-# FB 粉專貼文草稿（未發）
+# FB 粉專貼文（11/22 12:0x 已發）
 
-配圖：promo/assets/fb.png
+配圖：promo/assets/hero.png（使用者 11/22 改用主視覺）
 
 ---
 
