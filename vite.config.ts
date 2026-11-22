@@ -27,7 +27,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,svg,png,webmanifest}'],
+        // 廣宣頁（/promo/）不進離線快取，也不被 App 首頁攔走
+        globIgnores: ['promo/**'],
         navigateFallback: '/find-elder/index.html',
+        navigateFallbackDenylist: [/^\/find-elder\/promo\//],
         // 新版一裝好就接手，手機重開 App 就是最新版
         // 好吃的方格資料：用過的存起來，沒網路也看得到；有網路時背景更新
         runtimeCaching: [

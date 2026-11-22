@@ -24,7 +24,7 @@
 - 尋寶範圍讓玩家自己選，最小 100 公尺。
 
 ## 下一步
-- 廣宣頁（/promo）：第 4 步完成，三張圖已歸位 promo/assets（hero 1920x1080、og 1200x630、fb 1080x1080）。第 5 步：promo/site/index.html 和 promo/fb-post.md 草稿已寫好、手機版預覽過；還沒部署，等使用者同意部署方式（建議放 public/promo/，網址 /find-elder/promo/，並讓 PWA 不攔截、不預先快取這一頁）。FB 貼文只是草稿，沒發。
+- 廣宣頁（/promo）：已部署到 https://jjptt1980.github.io/find-elder/promo/ （原稿 promo/site/index.html，部署用的一份放 public/promo/，改原稿後要重新複製過去；圖片路徑改成同層）。PWA 設定讓 /promo/ 不進離線快取、不被首頁攔走。FB 貼文 promo/fb-post.md 只是草稿，沒發。
 - 實機（vivo X200 Pro）測試：指南針方向（heading.ts）、召喚演出的震動和地鳴聲。
 - 廣宣系列（JJptt 粉專）：第 1 篇 11/20 已發。第 2～4 篇（私房地圖、好吃的、集滿七顆）使用者已確認全文和配圖，排在 11/21～11/23 每天約 13:20～13:50 自動發（靠原本那個對話的排程，電腦和 Claude App 要開著；漏發就手動補）。素材和佇列在 ~/.claude/projects/-Users-taiwanpapi-find-elder/promo/queue.md（不進 git）。
 
